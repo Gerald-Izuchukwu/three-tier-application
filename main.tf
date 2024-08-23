@@ -225,7 +225,6 @@ resource "aws_lb_listener" "web_app_lb_listener" {
   }
 }
 
-
 resource "aws_lb_target_group" "web_app_lb_tg" {
   name     = "frontEnd-targetGroup"
   port     = 80
@@ -233,85 +232,166 @@ resource "aws_lb_target_group" "web_app_lb_tg" {
   vpc_id   = aws_vpc.main.id
 }
 
+resource "aws_instance" "bastion_host" {
+  count                       = 1
+  ami                         = "ami-0b72821e2f351e396"
+  instance_type               = "t2.micro"
+  key_name                    = aws_key_pair.this.key_name
+  availability_zone           = var.avail_zone[0]
+  subnet_id                   = aws_subnet.public[0].id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.web_app_sg.id]
+    user_data = file("public_entry_script.sh")
 
-
-## Application Tier
-resource "aws_launch_template" "logic_app_template" {
-  image_id               = var.image_id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.logic_app_sg.id]
-  user_data              = filebase64("private_entry_script.sh")
-  key_name               = aws_key_pair.this.key_name
-
-
-  tags = {
-    Name = "${var.env_prefix}_logic_app_template"
-  }
-
-
-
-}
-
-
-resource "aws_security_group" "logic_app_sg" {
-  name        = "logic_app_sg"
-  description = "Security group for web server"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    description     = "Allow ICMP from web_app_sg"
-    from_port       = -1
-    to_port         = -1
-    protocol        = "icmp"
-    security_groups = [aws_security_group.web_app_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    tags = {
+    Name = "${var.env_prefix}_bastion_host"
   }
 }
 
-resource "aws_autoscaling_group" "logic_app_asg" {
-  name     = "logic_app_asg"
-  max_size = 3
-  min_size = 2
 
-  vpc_zone_identifier = aws_subnet.private[*].id
 
-  launch_template {
-    id = aws_launch_template.logic_app_template.id
-  }
-}
+# ## Application Tier
+# resource "aws_launch_template" "logic_app_template" {
+#   image_id               = var.image_id
+#   instance_type          = var.instance_type
+#   vpc_security_group_ids = [aws_security_group.logic_app_sg.id]
+#   user_data              = filebase64("private_entry_script.sh")
+#   key_name               = aws_key_pair.this.key_name
 
-resource "aws_lb" "logic_app_lb" {
-  name               = "backEnd-loadbalancer"
-  internal           = true
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.logic_app_sg.id]
-  subnets            = [for subnet in aws_subnet.private : subnet.id]
 
-}
+#   tags = {
+#     Name = "${var.env_prefix}_logic_app_template"
+#   }
 
-resource "aws_lb_listener" "logic_app_lb_listener" {
-  load_balancer_arn = aws_lb.logic_app_lb.arn
-  port              = "80"
-  protocol          = "HTTP"
-  #   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  #   certificate_arn   = "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4"
 
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.logic_app_lb_tg.arn
-  }
-}
 
-resource "aws_lb_target_group" "logic_app_lb_tg" {
-  name     = "backEnd-targetGroup"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
-}
+# }
 
+# resource "aws_security_group" "logic_app_sg" {
+#   name        = "logic_app_sg"
+#   description = "Security group for web server"
+#   vpc_id      = aws_vpc.main.id
+
+#   ingress {
+#     description     = "Allow ICMP from web_app_sg"
+#     from_port       = -1
+#     to_port         = -1
+#     protocol        = "icmp"
+#     security_groups = [aws_security_group.web_app_sg.id]
+#   }
+
+#   ingress {
+#     description = "Allow ssh only from bastion host"
+#     from_port   = 22
+#     to_port     = 22
+#     protocol    = "tcp"
+#     cidr_blocks = ["${aws_instance.bastion_host[0].public_ip}/32"]
+#   }
+
+#   ingress {
+#     description     = "Allow MySQL/Aurora traffic from app server"
+#     protocol        = "tcp"
+#     from_port       = 3306
+#     to_port         = 3306
+#     security_groups = [aws_security_group.database_sg.id]
+#   }
+
+#   egress {
+#     protocol        = "tcp"
+#     from_port       = 3306
+#     to_port         = 3306
+#     security_groups = [aws_security_group.database_sg.id]
+#   }
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+# }
+
+# resource "aws_autoscaling_group" "logic_app_asg" {
+#   name     = "logic_app_asg"
+#   max_size = 3
+#   min_size = 2
+
+#   vpc_zone_identifier = aws_subnet.private[*].id
+
+#   launch_template {
+#     id = aws_launch_template.logic_app_template.id
+#   }
+# }
+
+# resource "aws_lb" "logic_app_lb" {
+#   name               = "backEnd-loadbalancer"
+#   internal           = true
+#   load_balancer_type = "application"
+#   security_groups    = [aws_security_group.logic_app_sg.id]
+#   subnets            = [for subnet in aws_subnet.private : subnet.id]
+
+# }
+
+# resource "aws_lb_listener" "logic_app_lb_listener" {
+#   load_balancer_arn = aws_lb.logic_app_lb.arn
+#   port              = "80"
+#   protocol          = "HTTP"
+#   #   ssl_policy        = "ELBSecurityPolicy-2016-08"
+#   #   certificate_arn   = "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4"
+
+#   default_action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.logic_app_lb_tg.arn
+#   }
+# }
+
+# resource "aws_lb_target_group" "logic_app_lb_tg" {
+#   name     = "backEnd-targetGroup"
+#   port     = 80
+#   protocol = "HTTP"
+#   vpc_id   = aws_vpc.main.id
+# }
+
+# ## Database Tier
+
+# # resource "aws"
+
+# resource "aws_security_group" "database_sg" {
+#   vpc_id      = aws_vpc.main.id
+#   description = "Security group for the database server"
+#   name        = "databse sg"
+#   ingress {
+#     description     = "Allow MySQL/Aurora traffic from app server"
+#     protocol        = "tcp"
+#     from_port       = 3306
+#     to_port         = 3306
+#     security_groups = [aws_security_group.logic_app_sg.id]
+#   }
+
+#   egress {
+#     protocol        = "tcp"
+#     from_port       = 3306
+#     to_port         = 3306
+#     security_groups = [aws_security_group.logic_app_sg.id]
+#   }
+# }
+
+# resource "aws_db_subnet_group" "default" {
+#   name       = "main"
+#   subnet_ids = [aws_subnet.db_private[*].id]
+
+#   tags = {
+#     Name = "My DB subnet group"
+#   }
+# }
+
+# resource "aws_db_instance" "default" {
+#   allocated_storage    = 10
+#   db_name              = "mydb"
+#   engine               = "mysql"
+#   engine_version       = "8.0"
+#   instance_class       = "db.t3.micro"
+#   username             = "foo"
+#   password             = "foobarbaz"
+#   parameter_group_name = "default.mysql8.0"
+#   skip_final_snapshot  = true
+# }
