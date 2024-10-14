@@ -5,10 +5,10 @@
 sudo yum update -y >> /var/log/user-data.log 2>&1
 sudo yum install -y docker >> /var/log/user-data.log 2>&1
 
-# Start Docker service
-sudo systemctl start docker >> /var/log/user-data.log 2>&1
+# # Start Docker service
+# sudo systemctl start docker >> /var/log/user-data.log 2>&1
 
-while ! systemctl is-active docker; do sleep 5; done
+# while ! systemctl is-active docker; do sleep 5; done
 
 # docker run -d -p80:80 --name nginx-test nginx
 
@@ -28,11 +28,23 @@ sudo rm -rf fastcgi_params.default  nginx.conf.default fastcgi.conf.default mime
 
 cd /home/ec2-user
 sudo aws s3 cp s3://three-tier-test-app/frontend/ frontend/ --recursive
+
+# Retrieve ALB DNS from SSM Parameter Store
+ALB_DNS_NAME=$(aws ssm get-parameter --name "/myapp/alb_dns_name" --query "Parameter.Value" --output text)
+
+# Export ALB DNS as environment variable
+echo "export ALB_DNS_NAME=$ALB_DNS_NAME" >> /etc/environment
+
+# Replace placeholder in Nginx configuration with actual ALB DNS name
+sudo sed -i "s|<ALB_DNS_PLACEHOLDER>|$ALB_DNS_NAME|g" /home/ec2-user/frontend/nginx.conf
+
+
 # sudo cp /home/ec2-user/frontend/public/{countries.html,time.html,health.html,script.js,index.html} /usr/share/nginx/html/
 sudo mv /home/ec2-user/frontend/nginx.conf /etc/nginx
 sudo chmod -R 755 /home/ec2-user
-sudo systemctl start nginx
+sudo systemctl start nginx >> /var/log/user-data.log
 
+echo "ALB DNS successfully retrieved and Nginx started" >> /var/log/user-data.log
 
 
 
