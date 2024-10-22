@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Query Results</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+    <!-- <link rel="stylesheet" href="/styles.css"> Optional CSS -->
+    <script defer src="/script.js"></script> <!-- Link to JavaScript file -->
+</head>
+<body>
+    <h1>Query Everything Relating to Time and Countries</h1>
+    <div id="add-user-form">
+        <input type="text" id="country" placeholder="Country ID">
+        <button id="get-country">Get Country</button>
+        <button id="get-all-countries">Get All Countries</button>
+        <button id="add-country"> Add Country</button>
+        <button id="past-countries">Past Countries</button>
+        <button id="delete-past-countries">Delete Past Countries</button>
+        <button id="queryTime">Query Time</button>
+        <button id="clear">Clear</button>
+        <button id="home">Go Home</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const queryTimeButton = document.getElementById('queryTime');
+            const home = document.getElementById('home');
+
+            queryTimeButton.addEventListener('click', () => {
+                window.location.href = '/time'; // Redirect to the /time page
+            });
+
+            home.addEventListener('click', () => {
+                window.location.href = '/'; // Redirect to the /home page
+            });        
+        });
+    </script>
+</body>
+</html>

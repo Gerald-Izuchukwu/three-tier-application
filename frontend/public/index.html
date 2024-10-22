@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Query Results</title>
+</head>
+<body>
+    <h1>Query Everything Relating to Time and Countries</h1>
+    <h3>Welcome</h3>
+    <button id="queryTime">Query Time</button>
+    <button id="queryCountry">Query Country</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const queryTimeButton = document.getElementById('queryTime');
+            const queryCountryButton = document.getElementById('queryCountry');
+
+            queryTimeButton.addEventListener('click', () => {
+                window.location.href = '/time'; // Redirect to the /time page
+            });
+
+            queryCountryButton.addEventListener('click', () => {
+                window.location.href = '/countries'; // Redirect to the /countries page
+            });
+        });
+    </script>
+
+</body>
+</html>

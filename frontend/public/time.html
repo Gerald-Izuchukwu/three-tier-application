@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Query Results</title>
+    <link rel="stylesheet" href="/styles.css"> <!-- Optional CSS -->
+</head>
+<body>
+    <h1>Query Everything Relating to Time and Countries</h1>
+    <div id="add-user-form">
+        <input type="number" id="hours" placeholder="Hours">
+        <button id="get-time">Get Time </button>
+        <button id="get-time-now">Get Time Now</button>
+        <button id="clear">Clear</button>
+        <button id="queryCountry">Query Country</button>
+        <button id="home">Go Home</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const queryCountryButton = document.getElementById('queryCountry');
+            const home = document.getElementById('home');
+            const resultElement = document.getElementById('result');
+            const hoursInput = document.getElementById('hours');
+            const getTime  = document.getElementById('get-time');
+            const getTimeNow  = document.getElementById('get-time-now');
+            const clearButton = document.getElementById('clear')
+
+
+            queryCountryButton.addEventListener('click', () => {
+                window.location.href = '/countries'; // Redirect to the countries page
+            });
+
+            home.addEventListener('click', () => {
+                window.location.href = '/'; // Redirect to the home page
+            });
+
+            getTime.addEventListener('click', () => {
+                const hours = hoursInput.value.trim();
+                const url = '/api/gettime'; 
+
+                const requestBody = {
+                    hours: hours ? parseInt(hours, 10) : null 
+                };
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.date);
+                    resultElement.innerText = `The time in ${hours} hours is ${data.date}`
+                }).catch(error => console.error('Error fetching data:', error));
+            });
+
+            getTimeNow.addEventListener('click', () =>{
+                const url = '/api/timenow'; 
+
+                fetch(url, {
+                    method: "GET",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data =>{
+                    console.log(data.date);
+                    resultElement.innerText = `The time now  is ${data.date}`
+                })
+                .catch(error => console.error('Error fetching data:', error))
+            })
+
+            clearButton.addEventListener('click', ()=>{
+                resultElement.innerHTML = ''
+                hoursInput.value = ''
+            })
+        });
+    </script>
+</body>
+</html>
