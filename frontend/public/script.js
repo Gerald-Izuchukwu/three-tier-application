@@ -51,7 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     getCountries.addEventListener('click', ()=>{
-        const url = '/api/getcountries'
+        console.log('Button clicked, fetching countries...');
+        const url = '/api/getallcountries' //if this route is '/api/getcountries' it wont work. later check why
+
+        console.log(`fetching data from ${url}`);
+        
 
         fetch(url, {
             method: "GET",
@@ -59,17 +63,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Content-Type': 'application/json'
             },
         })
-        .then(response=> response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
-            console.log(data);
+            console.log(data); // Check the data received
             let tableHTML = `<table border="1">
             <tr>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Timezones</th>
             </tr>`;
-
-            // Populate the table with data (assuming data is an object containing id, name, and timezones)
+        
             Object.values(data).forEach(country => {
                 tableHTML += `<tr>
                                 <td>${country.id}</td>
@@ -77,17 +85,18 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <td>${country.timezones.join(', ')}</td>
                               </tr>`;
             });
-
-            // Close the table
+        
             tableHTML += `</table>`;
-
-            // Display the table in the result element
             resultElement.innerHTML = tableHTML;
         })
+        .catch(error => {
+            console.error('Error fetching countries:', error);
+        });
+        
     })
 
     getPastCountries.addEventListener('click', ()=>{
-        const url = '/api/pastcountries'
+        const url = '/api/previouscountries'
 
         fetch(url, {
             method: "GET",
@@ -122,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
     deletePastCountries.addEventListener('click', ()=>{
-        const url = '/api/deletecountries'
+        const url = '/api/deletepreviouscountries'
 
         fetch(url, {
             method: "GET",

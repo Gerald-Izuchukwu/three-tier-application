@@ -20,7 +20,7 @@ app.get('/health', (req, res) => {
 });
 
 
-app.get('/timenow', async(req, res)=>{
+app.get('/thetimenow', async(req, res)=>{
     const date = new Date
     console.log (date.toString())
     return res.status(200).json({"date": date.toString()})
@@ -53,6 +53,10 @@ app.post('/getcountry', async(req, res)=>{
             return res.status(404).json({ error: 'Country not found' });
           }
         console.log(country)
+        console.log(process.env.HOST);
+        console.log(process.env.MYSQL_USER);
+        // return res.status(200).json(country)
+
         const db = await connectDB();
 
         const checkQuery = 'SELECT * FROM countries WHERE id = ?';
@@ -76,7 +80,7 @@ app.post('/getcountry', async(req, res)=>{
     }
 })
 
-app.get('/getcountries', async(req, res)=>{
+app.get('/getallcountries', async(req, res)=>{
     try {
         const countries = ct.getAllCountries({})
         res.status(200).json(countries)
@@ -89,7 +93,7 @@ app.get('/getcountries', async(req, res)=>{
 })
 
 
-app.get('/pastcountries', async (req, res) => {
+app.get('/previouscountries', async (req, res) => {
     try {
       const db = await connectDB(); 
       const [rows] = await db.execute('SELECT * FROM countries'); 
@@ -101,7 +105,7 @@ app.get('/pastcountries', async (req, res) => {
     }
 });
 
-app.get('/deletecountries', async(req, res)=>{
+app.get('/deletepreviouscountries', async(req, res)=>{
     try {
         const db = await connectDB()
         const [rows] = await db.execute('DELETE FROM countries')

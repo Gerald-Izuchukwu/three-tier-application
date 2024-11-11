@@ -16,12 +16,6 @@ sudo aws s3 cp s3://three-tier-test-app/backend/ backend/ --recursive
 # echo "USER=admin" | sudo tee -a /etc/environment
 # echo "DATABASE=testdb" | sudo tee -a /etc/environment
 
-
-
-# if you dont want to use natgw, you can create the backend instance like a normal instance and install all the required 
-# resources and create an AMI  from the instance. then use the created AMI to create the launch template for the backend instances
-# if thats the case, reduce the code above to the one below
-
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash 
 # Set NVM environment variables
 export NVM_DIR="$HOME/.nvm"
@@ -29,6 +23,7 @@ export NVM_DIR="$HOME/.nvm"
 nvm install 16 
 nvm use 16 
 cd backend/
-npm install
+sudo env "PATH=$PATH" npm install
+sudo npm install 
 # npm start >> /home/ec2-user/user-data.log 2>&1 
 npm start 
