@@ -59,7 +59,8 @@ resource "aws_security_group" "internalLoadBalancerSG" {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.webserverSG.id]
+    # security_groups = [aws_security_group.webserverSG.id]
+    cidr_blocks = ["10.0.0.0/24", "10.0.1.0/24"]
   }
 
   egress {

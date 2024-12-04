@@ -5,7 +5,7 @@ resource "aws_launch_template" "web_app_template" {
   vpc_security_group_ids = [var.webserverSG]
   # vpc_security_group_ids = [aws_security_group.webserverSG.id]
   user_data              = filebase64("frontend_script.sh")
-  key_name               = aws_key_pair.this.key_name
+  key_name               = var.key_name
   iam_instance_profile {
     arn = var.S3ReadAndSSManagerProfile
   }
@@ -14,10 +14,10 @@ resource "aws_launch_template" "web_app_template" {
   }
 }
 
-resource "aws_key_pair" "this" {
-  key_name   = "${var.env_prefix}_key_pair"
-  public_key = file(var.public_key_path)
-}
+# resource "aws_key_pair" "this" {
+#   key_name   = "${var.env_prefix}_key_pair"
+#   public_key = file(var.public_key_path)
+# }
 
 resource "aws_lb" "externalLoadBalancer" {
   name               = "External-Load-Balancer"

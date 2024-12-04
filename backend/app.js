@@ -19,6 +19,15 @@ app.get('/health', (req, res) => {
     res.status(200).sendFile(__dirname + '/index.html');
 });
 
+app.get('/list_db_parameters', (req, res)=>{
+    res.status(200).json({
+        "HOST":process.env.HOST,
+        "MYSQL_USER":process.env.MYSQL_USER,
+        "PASSWORD":process.env.PASSWORD,
+        "DATABASE":process.env.DATABASE
+    })
+})
+
 
 app.get('/thetimenow', async(req, res)=>{
     const date = new Date
@@ -79,7 +88,7 @@ app.post('/getcountry', async(req, res)=>{
         }
     }
 })
-
+// update this file on s3
 app.get('/getallcountries', async(req, res)=>{
     try {
         const countries = ct.getAllCountries({})

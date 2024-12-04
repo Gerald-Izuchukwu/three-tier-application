@@ -10,11 +10,35 @@ resource "aws_db_subnet_group" "default" {
   }
 }
 
+resource "aws_ssm_parameter" "db_username" {
+  name  = "/myapp/db_username"
+  type  = "String"
+  value = var.db_instance_username
+}
+
+resource "aws_ssm_parameter" "db_host" {
+  name  = "/myapp/db_host"
+  type  = "String"
+  value = aws_db_instance.default.address
+}
+
+resource "aws_ssm_parameter" "db_password" {
+  name  = "/myapp/db_password"
+  type  = "String"
+  value = var.db_instance_password
+}
+
+resource "aws_ssm_parameter" "db_name" {
+  name  = "/myapp/db_name"
+  type  = "String"
+  value = var.db_name
+}
+
 resource "aws_db_instance" "default" {
   allocated_storage    = 10
-  db_name              = "mydb"
+  db_name              = var.db_name
   engine               = "mysql"
-  engine_version       = "8.0.35"
+  engine_version       = "8.0.39"
   instance_class       = "db.t3.micro"
   username             = var.db_instance_username
   password             = var.db_instance_password
@@ -24,5 +48,6 @@ resource "aws_db_instance" "default" {
   #   vpc_security_group_ids = [aws_security_group.dbserverSG.id]
   vpc_security_group_ids = [var.dbserverSG]
   availability_zone      = var.avail_zone[0]
+  multi_az               = false
 }
 

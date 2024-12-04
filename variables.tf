@@ -12,3 +12,4 @@ variable "image_id" {}
 variable "db_instance_password" {}
 variable "db_instance_username" {}
 variable "S3ReadAndSSManagerProfile" {}
+variable "db_name" {}

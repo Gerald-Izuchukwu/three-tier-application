@@ -15,7 +15,6 @@ resource "aws_subnet" "public" {
   count      = 2
   vpc_id     = aws_vpc.main.id
   cidr_block = cidrsubnet(var.vpc_cidr, 8, count.index)
-  # availability_zone       = var.avail_zone[count.index]
   availability_zone       = var.avail_zone[count.index]
   map_public_ip_on_launch = true
 
@@ -74,7 +73,7 @@ resource "aws_internet_gateway" "this" {
 # }
 
 # ROUTE TABLES
-resource "aws_route_table" "public_route_table" {
+resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
   route {
     cidr_block = "0.0.0.0/0"
@@ -90,10 +89,10 @@ resource "aws_route_table" "public_route_table" {
 resource "aws_route_table_association" "public" {
   count          = 2
   subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public_route_table.id
+  route_table_id = aws_route_table.public.id
 }
 
-resource "aws_route_table" "private_route_table" {
+resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
   route {
     cidr_block = "0.0.0.0/0"
@@ -108,11 +107,11 @@ resource "aws_route_table" "private_route_table" {
 resource "aws_route_table_association" "private" {
   count          = 2
   subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private_route_table.id
+  route_table_id = aws_route_table.private.id
 }
 
-# resource "aws_route_table_association" "db_private" {
-#   count          = 2
-#   subnet_id      = aws_subnet.db_private[count.index].id
-#   route_table_id = aws_route_table.private_route_table.id
-# }
+resource "aws_route_table_association" "db_private" {
+  count          = 2
+  subnet_id      = aws_subnet.db_private[count.index].id
+  route_table_id = aws_route_table.private.id
+}

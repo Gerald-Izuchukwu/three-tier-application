@@ -11,10 +11,14 @@ dnf -y install mysql mysql-community-client >> /var/log/user-data.log 2>&1
 
 cd /home/ec2-user
 sudo aws s3 cp s3://three-tier-test-app/backend/ backend/ --recursive
-
-# echo "HOST=testdb.chk0cciwykqg.us-east-1.rds.amazonaws.com" | sudo tee -a /etc/environment
-# echo "USER=admin" | sudo tee -a /etc/environment
-# echo "DATABASE=testdb" | sudo tee -a /etc/environment
+sudo chown -R ec2-user:ec2-user /home/ec2-user/backend
+sudo chmod -R 755 /home/ec2-user/backend
+cd backend
+touch config.env
+echo "HOST=$(aws ssm get-parameter --name "/myapp/db_host" --query "Parameter.Value" --output text)" >> config.env
+echo "PASSWORD=$(aws ssm get-parameter --name "/myapp/db_password" --query "Parameter.Value" --output text)" >> config.env
+echo "MYSQL_USER=$(aws ssm get-parameter --name "/myapp/db_username" --query "Parameter.Value" --output text)" >> config.env
+echo "DATABASE=$(aws ssm get-parameter --name "/myapp/db_name" --query "Parameter.Value" --output text)" >> config.env
 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash 
 # Set NVM environment variables

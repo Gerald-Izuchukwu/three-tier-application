@@ -7,7 +7,6 @@ variable "private_key_path" {}
 variable "instance_type" {}
 variable "image_id" {}
 variable "env_prefix" {}
-variable "key_name" {}
 variable "internal_lb_sg" {}
 variable "private_subnet" {}
 variable "vpc_id" {}

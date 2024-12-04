@@ -4,7 +4,7 @@ resource "aws_launch_template" "logic_app_template" {
   instance_type          = var.instance_type
   vpc_security_group_ids = [var.appserverSG]
   user_data              = filebase64("backend_script.sh")
-  key_name               = var.key_name // create a diff keypair OUTPUT
+  key_name               = aws_key_pair.this.key_name // create a diff keypair OUTPUT
   # key_name               = aws_key_pair.this.key_name // create a diff keypair OUTPUT
   iam_instance_profile {
     arn = var.S3ReadAndSSManagerProfile
@@ -15,6 +15,10 @@ resource "aws_launch_template" "logic_app_template" {
   }
 }
 
+resource "aws_key_pair" "this" {
+  key_name   = "${var.env_prefix}_key_pair"
+  public_key = file(var.public_key_path)
+}
 
 resource "aws_lb" "internalLoadBalancer" {
   name               = "Internal-Load-Balancer"
