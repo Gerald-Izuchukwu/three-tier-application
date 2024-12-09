@@ -28,7 +28,7 @@ resource "aws_subnet" "private" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index + 2)
   availability_zone       = var.avail_zone[count.index]
-  map_public_ip_on_launch = true // change to false later
+  map_public_ip_on_launch = false
 
   tags = {
     Name = "${var.env_prefix}_private_subnet-${count.index + 1}"
@@ -55,22 +55,22 @@ resource "aws_internet_gateway" "this" {
   }
 }
 
-# # NAT-GW
-# resource "aws_nat_gateway" "nat" {
-#   allocation_id = aws_eip.nat.id
-#   subnet_id     = aws_subnet.public[0].id
+# NAT-GW
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public[0].id
 
-#   tags = {
-#     Name = "${var.env_prefix}_nat_gateway"
-#   }
-# }
+  tags = {
+    Name = "${var.env_prefix}_nat_gateway"
+  }
+}
 
-# resource "aws_eip" "nat" {
-#   domain = "vpc"
-#   tags = {
-#     Name = "${var.env_prefix}_eip_nat"
-#   }
-# }
+resource "aws_eip" "nat" {
+  domain = "vpc"
+  tags = {
+    Name = "${var.env_prefix}_eip_nat"
+  }
+}
 
 # ROUTE TABLES
 resource "aws_route_table" "public" {
@@ -96,7 +96,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
+    gateway_id = aws_nat_gateway.nat.id
   }
 
   tags = {
